@@ -1,5 +1,6 @@
 package com.example.subsidy_management_api.api.dto;
 
+import com.example.subsidy_management_api.domain.ApplicationStatus;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
 
@@ -13,13 +14,24 @@ public class SubsidyApplicationCreateRequest {
   @Valid
   private ApplicationInput application;
 
-  public ApplicantInput getApplicant() { return applicant; }
-  public void setApplicant(ApplicantInput applicant) { this.applicant = applicant; }
+  public ApplicantInput getApplicant() {
+    return applicant;
+  }
 
-  public ApplicationInput getApplication() { return application; }
-  public void setApplication(ApplicationInput application) { this.application = application; }
+  public void setApplicant(ApplicantInput applicant) {
+    this.applicant = applicant;
+  }
+
+  public ApplicationInput getApplication() {
+    return application;
+  }
+
+  public void setApplication(ApplicationInput application) {
+    this.application = application;
+  }
 
   public static class ApplicantInput {
+
     @NotNull
     private String fullName;
 
@@ -30,29 +42,65 @@ public class SubsidyApplicationCreateRequest {
     private String address1;
     private String address2;
 
-    public String getFullName() { return fullName; }
-    public void setFullName(String fullName) { this.fullName = fullName; }
+    public String getFullName() {
+      return fullName;
+    }
 
-    public String getFullNameKana() { return fullNameKana; }
-    public void setFullNameKana(String fullNameKana) { this.fullNameKana = fullNameKana; }
+    public void setFullName(String fullName) {
+      this.fullName = fullName;
+    }
 
-    public String getEmail() { return email; }
-    public void setEmail(String email) { this.email = email; }
+    public String getFullNameKana() {
+      return fullNameKana;
+    }
 
-    public String getPhone() { return phone; }
-    public void setPhone(String phone) { this.phone = phone; }
+    public void setFullNameKana(String fullNameKana) {
+      this.fullNameKana = fullNameKana;
+    }
 
-    public String getPostalCode() { return postalCode; }
-    public void setPostalCode(String postalCode) { this.postalCode = postalCode; }
+    public String getEmail() {
+      return email;
+    }
 
-    public String getAddress1() { return address1; }
-    public void setAddress1(String address1) { this.address1 = address1; }
+    public void setEmail(String email) {
+      this.email = email;
+    }
 
-    public String getAddress2() { return address2; }
-    public void setAddress2(String address2) { this.address2 = address2; }
+    public String getPhone() {
+      return phone;
+    }
+
+    public void setPhone(String phone) {
+      this.phone = phone;
+    }
+
+    public String getPostalCode() {
+      return postalCode;
+    }
+
+    public void setPostalCode(String postalCode) {
+      this.postalCode = postalCode;
+    }
+
+    public String getAddress1() {
+      return address1;
+    }
+
+    public void setAddress1(String address1) {
+      this.address1 = address1;
+    }
+
+    public String getAddress2() {
+      return address2;
+    }
+
+    public void setAddress2(String address2) {
+      this.address2 = address2;
+    }
   }
 
   public static class ApplicationInput {
+
     @NotNull
     private String applicationDate; // まずは文字列で受ける（最短）
 
@@ -60,15 +108,30 @@ public class SubsidyApplicationCreateRequest {
     private Long amountRequested;
 
     @NotNull
-    private String status;
+    private ApplicationStatus status;
 
-    public String getApplicationDate() { return applicationDate; }
-    public void setApplicationDate(String applicationDate) { this.applicationDate = applicationDate; }
+    public String getApplicationDate() {
+      return applicationDate;
+    }
 
-    public Long getAmountRequested() { return amountRequested; }
-    public void setAmountRequested(Long amountRequested) { this.amountRequested = amountRequested; }
+    public void setApplicationDate(String applicationDate) {
+      this.applicationDate = applicationDate;
+    }
 
-    public String getStatus() { return status; }
-    public void setStatus(String status) { this.status = status; }
+    public Long getAmountRequested() {
+      return amountRequested;
+    }
+
+    public void setAmountRequested(Long amountRequested) {
+      this.amountRequested = amountRequested;
+    }
+
+    public ApplicationStatus getStatus() {
+      return status;
+    }
+
+    public void setStatus(ApplicationStatus status) {
+      this.status = status;
+    }
   }
 }
