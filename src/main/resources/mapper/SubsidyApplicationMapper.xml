@@ -22,4 +22,32 @@
     )
   </insert>
 
+  <select id="findList" resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem">
+    SELECT
+    sa.id AS applicationId,
+    a.id AS applicantId,
+    a.full_name AS applicantFullName,
+    sa.application_date AS applicationDate,
+    sa.amount_requested AS amountRequested,
+    sa.status AS status
+    FROM subsidy_applications sa
+    JOIN applicants a ON a.id = sa.applicant_id
+    WHERE
+    sa.deleted_at IS NULL
+    AND a.deleted_at IS NULL
+    <if test="status != null and status != ''">
+      AND sa.status = #{status}
+    </if>
+    <if test="from != null">
+      AND sa.application_date &gt;= #{from}
+    </if>
+    <if test="to != null">
+      AND sa.application_date &lt;= #{to}
+    </if>
+    <if test="q != null and q != ''">
+      AND a.full_name LIKE CONCAT('%', #{q}, '%')
+    </if>
+    ORDER BY sa.id DESC
+  </select>
+
 </mapper>
