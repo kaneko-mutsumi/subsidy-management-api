@@ -6,6 +6,7 @@ import com.example.subsidy_management_api.api.dto.SubsidyApplicationDetailRespon
 import com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem;
 import com.example.subsidy_management_api.domain.Applicant;
 import com.example.subsidy_management_api.domain.SubsidyApplication;
+import com.example.subsidy_management_api.exception.NotFoundException;
 import com.example.subsidy_management_api.mapper.ApplicantMapper;
 import com.example.subsidy_management_api.mapper.SubsidyApplicationMapper;
 import java.time.LocalDate;
@@ -65,14 +66,14 @@ public class SubsidyApplicationService {
   @Transactional(readOnly = true)
   public SubsidyApplicationDetailResponse findDetail(long id) {
     return applicationMapper.findDetailById(id)
-        .orElseThrow(() -> new IllegalArgumentException("Application not found: id=" + id));
+        .orElseThrow(() -> new NotFoundException("Application not found: id=" + id));
   }
 
   @Transactional
   public void delete(long id) {
     int updated = applicationMapper.logicalDeleteById(id);
     if (updated == 0) {
-      throw new IllegalArgumentException("Application not found or already deleted: id=" + id);
+      throw new NotFoundException("Application not found or already deleted: id=" + id);
     }
   }
 }

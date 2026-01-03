@@ -18,11 +18,12 @@
     #{applicantId},
     #{applicationDate},
     #{amountRequested},
-    #{status}
+    #{status, jdbcType=VARCHAR}
     )
   </insert>
 
-  <select id="findList" resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem">
+  <select id="findList"
+    resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem">
     SELECT
     sa.id AS applicationId,
     a.id AS applicantId,
@@ -50,7 +51,8 @@
     ORDER BY sa.id DESC
   </select>
 
-  <select id="findDetailById" resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationDetailResponse">
+  <select id="findDetailById"
+    resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationDetailResponse">
     SELECT
     sa.id AS applicationId,
     a.id AS applicantId,
