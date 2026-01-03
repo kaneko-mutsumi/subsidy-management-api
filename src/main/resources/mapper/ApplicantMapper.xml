@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.subsidy_management_api.mapper.ApplicantMapper">
+
+  <insert id="insert"
+    parameterType="com.example.subsidy_management_api.domain.Applicant"
+    useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO applicants (
+    full_name,
+    full_name_kana,
+    email,
+    phone,
+    postal_code,
+    address1,
+    address2
+    ) VALUES (
+    #{fullName},
+    #{fullNameKana},
+    #{email},
+    #{phone},
+    #{postalCode},
+    #{address1},
+    #{address2}
+    )
+  </insert>
+
+</mapper>

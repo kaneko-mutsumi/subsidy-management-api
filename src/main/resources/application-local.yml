@@ -3,3 +3,6 @@ spring:
     url: jdbc:mysql://localhost:${MYSQL_PORT:3306}/${MYSQL_DATABASE:subsidy}?useSSL=false&allowPublicKeyRetrieval=true&serverTimezone=Asia/Tokyo
     username: ${MYSQL_USER:app}
     password: ${MYSQL_PASSWORD:apppass}
+
+mybatis:
+  mapper-locations: classpath*:mapper/**/*.xml
