@@ -1,9 +1,11 @@
 package com.example.subsidy_management_api.mapper;
 
+import com.example.subsidy_management_api.api.dto.SubsidyApplicationDetailResponse;
 import com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem;
 import com.example.subsidy_management_api.domain.SubsidyApplication;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Optional;
 import org.apache.ibatis.annotations.Mapper;
 import org.apache.ibatis.annotations.Param;
 
@@ -17,4 +19,8 @@ public interface SubsidyApplicationMapper {
       @Param("to") LocalDate to,
       @Param("q") String q
   );
+
+  Optional<SubsidyApplicationDetailResponse> findDetailById(@Param("id") long id);
+
+  int logicalDeleteById(@Param("id") long id);
 }
