@@ -2,10 +2,12 @@ package com.example.subsidy_management_api.service;
 
 import com.example.subsidy_management_api.api.dto.SubsidyApplicationCreateRequest;
 import com.example.subsidy_management_api.api.dto.SubsidyApplicationCreateResponse;
+import com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem;
 import com.example.subsidy_management_api.domain.Applicant;
 import com.example.subsidy_management_api.domain.SubsidyApplication;
 import com.example.subsidy_management_api.mapper.ApplicantMapper;
 import com.example.subsidy_management_api.mapper.SubsidyApplicationMapper;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -46,5 +48,15 @@ public class SubsidyApplicationService {
     applicationMapper.insert(app); // ← ここで app.id が採番される
 
     return new SubsidyApplicationCreateResponse(applicant.getId(), app.getId());
+  }
+
+  @Transactional(readOnly = true)
+  public List<SubsidyApplicationListItem> findList(String status, String from, String to, String q) {
+    LocalDate fromDate = (from == null || from.isBlank()) ? null : LocalDate.parse(from);
+    LocalDate toDate = (to == null || to.isBlank()) ? null : LocalDate.parse(to);
+    String keyword = (q == null || q.isBlank()) ? null : q;
+    String st = (status == null || status.isBlank()) ? null : status;
+
+    return applicationMapper.findList(st, fromDate, toDate, keyword);
   }
 }
