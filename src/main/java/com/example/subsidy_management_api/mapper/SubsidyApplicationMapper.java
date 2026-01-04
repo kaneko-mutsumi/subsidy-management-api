@@ -11,6 +11,7 @@ import org.apache.ibatis.annotations.Param;
 
 @Mapper
 public interface SubsidyApplicationMapper {
+
   int insert(SubsidyApplication application); // application.id に採番が入る
 
   List<SubsidyApplicationListItem> findList(
@@ -23,4 +24,6 @@ public interface SubsidyApplicationMapper {
   Optional<SubsidyApplicationDetailResponse> findDetailById(@Param("id") long id);
 
   int logicalDeleteById(@Param("id") long id);
+
+  Integer existsActiveById(long id);
 }
