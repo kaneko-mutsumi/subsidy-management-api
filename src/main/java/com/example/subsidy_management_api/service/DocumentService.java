@@ -3,6 +3,7 @@ package com.example.subsidy_management_api.service;
 import com.example.subsidy_management_api.api.dto.DocumentCreateRequest;
 import com.example.subsidy_management_api.api.dto.DocumentCreateResponse;
 import com.example.subsidy_management_api.api.dto.DocumentListItem;
+import com.example.subsidy_management_api.domain.DocumentPayloadValidator;
 import com.example.subsidy_management_api.exception.NotFoundException;
 import com.example.subsidy_management_api.mapper.DocumentMapper;
 import com.example.subsidy_management_api.mapper.SubsidyApplicationMapper;
@@ -35,6 +36,8 @@ public class DocumentService {
     if (exists == null) {
       throw new NotFoundException("Application not found: id=" + req.getApplicationId());
     }
+
+    DocumentPayloadValidator.validateRequiredKeys(req.getDocumentType(), req.getPayload());
 
     String payloadJson = null;
     if (req.getPayload() != null) {

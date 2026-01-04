@@ -58,3 +58,48 @@ Get-Content .env | ForEach-Object {
   "totalAmountRequested": 150000
 }
 ```
+
+## Documents payload template（差し込み項目テンプレ）
+
+`POST /documents` の `payload` は、`documentType` に応じて最低限の必須キーを要求します。
+必須キーが不足している場合は `400 Bad Request` を返します。
+
+### DECISION_NOTICE（交付決定通知）
+必須キー：
+- `applicantFullName`
+- `applicationDate` (YYYY-MM-DD)
+- `amountRequested` (number)
+- `decisionDate` (YYYY-MM-DD)
+- `approvedAmount` (number)
+
+### SETTLEMENT_NOTICE（確定通知）
+必須キー：
+- `applicantFullName`
+- `applicationDate` (YYYY-MM-DD)
+- `amountRequested` (number)
+- `settlementDate` (YYYY-MM-DD)
+- `approvedAmount` (number)
+
+### SURVEY_REQUEST（調査依頼）
+必須キー：
+- `applicantFullName`
+- `applicationDate` (YYYY-MM-DD)
+- `amountRequested` (number)
+- `surveyDueDate` (YYYY-MM-DD)
+
+### Example（POST /documents）
+```json
+{
+  "applicationId": 2,
+  "documentType": "DECISION_NOTICE",
+  "documentNo": "R8-001",
+  "issuedBy": "city-staff",
+  "payload": {
+    "applicantFullName": "佐藤花子",
+    "applicationDate": "2026-01-05",
+    "amountRequested": 150000,
+    "decisionDate": "2026-01-10",
+    "approvedAmount": 150000
+  }
+}
+```

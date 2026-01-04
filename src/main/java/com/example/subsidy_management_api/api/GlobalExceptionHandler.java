@@ -2,13 +2,14 @@ package com.example.subsidy_management_api.api;
 
 import com.example.subsidy_management_api.api.dto.ApiErrorResponse;
 import com.example.subsidy_management_api.exception.NotFoundException;
+import java.time.OffsetDateTime;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.BindException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
-import org.springframework.web.bind.annotation.*;
-
-import java.time.OffsetDateTime;
+import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
+import org.springframework.web.bind.annotation.RestControllerAdvice;
 
 @RestControllerAdvice
 public class GlobalExceptionHandler {
@@ -25,7 +26,13 @@ public class GlobalExceptionHandler {
     return new ApiErrorResponse("BAD_REQUEST", "Validation failed", OffsetDateTime.now());
   }
 
-  // JSONが読めない / enum変換失敗（status不正など）
+  @ExceptionHandler(IllegalArgumentException.class)
+  @ResponseStatus(HttpStatus.BAD_REQUEST)
+  public ApiErrorResponse handleIllegalArgument(IllegalArgumentException ex) {
+    return new ApiErrorResponse("BAD_REQUEST",ex.getMessage(),java.time.OffsetDateTime.now()
+    );
+  }
+
   @ExceptionHandler(HttpMessageNotReadableException.class)
   @ResponseStatus(HttpStatus.BAD_REQUEST)
   public ApiErrorResponse handleNotReadable(HttpMessageNotReadableException ex) {
