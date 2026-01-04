@@ -14,11 +14,23 @@ public interface SubsidyApplicationMapper {
 
   int insert(SubsidyApplication application); // application.id に採番が入る
 
-  List<SubsidyApplicationListItem> findList(
+  // 一覧の総件数（ページング用）
+  long countList(
       @Param("status") String status,
       @Param("from") LocalDate from,
       @Param("to") LocalDate to,
       @Param("q") String q
+  );
+
+  // 一覧取得（limit/offset/orderBy）
+  List<SubsidyApplicationListItem> findList(
+      @Param("status") String status,
+      @Param("from") LocalDate from,
+      @Param("to") LocalDate to,
+      @Param("q") String q,
+      @Param("limit") int limit,
+      @Param("offset") int offset,
+      @Param("orderBy") String orderBy
   );
 
   Optional<SubsidyApplicationDetailResponse> findDetailById(@Param("id") long id);

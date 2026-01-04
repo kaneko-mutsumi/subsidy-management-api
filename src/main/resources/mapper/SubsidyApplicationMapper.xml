@@ -5,92 +5,75 @@
 
 <mapper namespace="com.example.subsidy_management_api.mapper.SubsidyApplicationMapper">
 
-  <insert id="insert"
-    parameterType="com.example.subsidy_management_api.domain.SubsidyApplication"
-    useGeneratedKeys="true"
-    keyProperty="id">
-    INSERT INTO subsidy_applications (
-    applicant_id,
-    application_date,
-    amount_requested,
-    status
-    ) VALUES (
-    #{applicantId},
-    #{applicationDate},
-    #{amountRequested},
-    #{status, jdbcType=VARCHAR}
-    )
-  </insert>
+  <!-- ✅ COUNT（total取得） -->
+  <select id="countList" resultType="long">
+    SELECT COUNT(*)
+    FROM subsidy_applications sa
+    JOIN applicants a ON a.id = sa.applicant_id
+    <where>
+      sa.deleted_at IS NULL
+      AND a.deleted_at IS NULL
 
+      <if test="status != null">
+        AND sa.status = #{status}
+      </if>
+
+      <if test="from != null">
+        AND sa.application_date <![CDATA[>=]]> #{from}
+      </if>
+
+      <if test="to != null">
+        AND sa.application_date <![CDATA[<=]]> #{to}
+      </if>
+
+      <if test="q != null">
+        AND (
+        a.full_name LIKE CONCAT('%', #{q}, '%')
+        OR a.email LIKE CONCAT('%', #{q}, '%')
+        )
+      </if>
+    </where>
+  </select>
+
+  <!-- ✅ SELECT（items取得：ページング＋ソート） -->
   <select id="findList"
     resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationListItem">
     SELECT
     sa.id AS applicationId,
-    a.id AS applicantId,
+    sa.applicant_id AS applicantId,
     a.full_name AS applicantFullName,
     sa.application_date AS applicationDate,
     sa.amount_requested AS amountRequested,
     sa.status AS status
     FROM subsidy_applications sa
     JOIN applicants a ON a.id = sa.applicant_id
-    WHERE
-    sa.deleted_at IS NULL
-    AND a.deleted_at IS NULL
-    <if test="status != null and status != ''">
-      AND sa.status = #{status}
-    </if>
-    <if test="from != null">
-      AND sa.application_date &gt;= #{from}
-    </if>
-    <if test="to != null">
-      AND sa.application_date &lt;= #{to}
-    </if>
-    <if test="q != null and q != ''">
-      AND a.full_name LIKE CONCAT('%', #{q}, '%')
-    </if>
-    ORDER BY sa.id DESC
-  </select>
+    <where>
+      sa.deleted_at IS NULL
+      AND a.deleted_at IS NULL
 
-  <select id="findDetailById"
-    resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationDetailResponse">
-    SELECT
-    sa.id AS applicationId,
-    a.id AS applicantId,
-    a.full_name AS applicantFullName,
-    a.full_name_kana AS applicantFullNameKana,
-    a.email AS applicantEmail,
-    a.phone AS applicantPhone,
-    a.postal_code AS applicantPostalCode,
-    a.address1 AS applicantAddress1,
-    a.address2 AS applicantAddress2,
-    sa.application_date AS applicationDate,
-    sa.amount_requested AS amountRequested,
-    sa.status AS status,
-    sa.decision_date AS decisionDate,
-    sa.approved_amount AS approvedAmount,
-    sa.paid_date AS paidDate,
-    sa.note AS note
-    FROM subsidy_applications sa
-    JOIN applicants a ON a.id = sa.applicant_id
-    WHERE
-    sa.id = #{id}
-    AND sa.deleted_at IS NULL
-    AND a.deleted_at IS NULL
-  </select>
+      <if test="status != null">
+        AND sa.status = #{status}
+      </if>
 
-  <update id="logicalDeleteById">
-    UPDATE subsidy_applications
-    SET deleted_at = CURRENT_TIMESTAMP(6)
-    WHERE id = #{id}
-    AND deleted_at IS NULL
-  </update>
+      <if test="from != null">
+        AND sa.application_date <![CDATA[>=]]> #{from}
+      </if>
 
-  <select id="existsActiveById" resultType="int">
-    SELECT 1
-    FROM subsidy_applications
-    WHERE id = #{id}
-    AND deleted_at IS NULL
-    LIMIT 1
+      <if test="to != null">
+        AND sa.application_date <![CDATA[<=]]> #{to}
+      </if>
+
+      <if test="q != null">
+        AND (
+        a.full_name LIKE CONCAT('%', #{q}, '%')
+        OR a.email LIKE CONCAT('%', #{q}, '%')
+        )
+      </if>
+    </where>
+
+    <!-- orderBy は Service 側でホワイトリスト変換した固定文字列のみを渡す -->
+    ORDER BY ${orderBy}
+    LIMIT #{limit} OFFSET #{offset}
   </select>
 
 </mapper>

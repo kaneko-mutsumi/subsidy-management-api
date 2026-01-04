@@ -26,4 +26,14 @@ public class SubsidyApplicationListItem {
   public LocalDate getApplicationDate() { return applicationDate; }
   public long getAmountRequested() { return amountRequested; }
   public String getStatus() { return status; }
+
+public SubsidyApplicationListItem() {
+}
+
+public void setApplicationId(long applicationId) { this.applicationId = applicationId; }
+public void setApplicantId(long applicantId) { this.applicantId = applicantId; }
+public void setApplicantFullName(String applicantFullName) { this.applicantFullName = applicantFullName; }
+public void setApplicationDate(LocalDate applicationDate) { this.applicationDate = applicationDate; }
+public void setAmountRequested(long amountRequested) { this.amountRequested = amountRequested; }
+public void setStatus(String status) { this.status = status; }
 }
