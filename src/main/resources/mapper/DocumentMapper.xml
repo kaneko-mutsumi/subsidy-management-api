@@ -5,7 +5,10 @@
 
 <mapper namespace="com.example.subsidy_management_api.mapper.DocumentMapper">
 
-  <insert id="insert">
+  <insert id="insert"
+    useGeneratedKeys="true"
+    keyProperty="id"
+    keyColumn="id">
     INSERT INTO documents
     (application_id, document_type, document_no, issued_by, payload_json)
     VALUES

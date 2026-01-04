@@ -6,13 +6,13 @@ import com.example.subsidy_management_api.api.dto.DocumentListItem;
 import com.example.subsidy_management_api.exception.NotFoundException;
 import com.example.subsidy_management_api.mapper.DocumentMapper;
 import com.example.subsidy_management_api.mapper.SubsidyApplicationMapper;
+import com.example.subsidy_management_api.mapper.param.DocumentInsertParam;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-
 import java.time.OffsetDateTime;
 import java.util.List;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 public class DocumentService {
@@ -45,17 +45,24 @@ public class DocumentService {
       }
     }
 
-    documentMapper.insert(
+    DocumentInsertParam param = new DocumentInsertParam();
+    param.setApplicationId(req.getApplicationId());
+    param.setDocumentType(req.getDocumentType().name());
+    param.setDocumentNo(req.getDocumentNo());
+    param.setIssuedBy(req.getIssuedBy());
+    param.setPayloadJson(payloadJson);
+
+    documentMapper.insert(param);
+
+    // MyBatisがAUTO_INCREMENTのidをparam.idにセットしてくれる
+    long documentId = (param.getId() == null) ? 0L : param.getId();
+
+    return new DocumentCreateResponse(
+        documentId,
         req.getApplicationId(),
         req.getDocumentType().name(),
-        req.getDocumentNo(),
-        req.getIssuedBy(),
-        payloadJson
+        OffsetDateTime.now()
     );
-
-    // 最短：insert後にID返却が欲しい場合は useGeneratedKeys を追加してdocumentIdを返す
-    // 今回は最短で「発行できた」ことを返す（IDが必要なら次の一手で対応）
-    return new DocumentCreateResponse(0L, req.getApplicationId(), req.getDocumentType().name(), OffsetDateTime.now());
   }
 
   @Transactional(readOnly = true)
