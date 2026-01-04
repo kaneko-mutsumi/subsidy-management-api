@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.subsidy_management_api.mapper.DocumentDraftMapper">
+
+  <select id="findBaseByApplicationId"
+    resultType="com.example.subsidy_management_api.mapper.result.ApplicationDraftBaseRow">
+    SELECT
+    sa.id AS applicationId,
+    a.full_name AS applicantFullName,
+    sa.application_date AS applicationDate,
+    sa.amount_requested AS amountRequested
+    FROM subsidy_applications sa
+    JOIN applicants a ON a.id = sa.applicant_id
+    WHERE sa.id = #{applicationId}
+    AND sa.deleted_at IS NULL
+    AND a.deleted_at IS NULL
+    LIMIT 1
+  </select>
+
+</mapper>
