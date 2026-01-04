@@ -3,9 +3,12 @@ package com.example.subsidy_management_api.api;
 import com.example.subsidy_management_api.api.dto.DocumentCreateRequest;
 import com.example.subsidy_management_api.api.dto.DocumentCreateResponse;
 import com.example.subsidy_management_api.api.dto.DocumentDraftResponse;
+import com.example.subsidy_management_api.api.dto.DocumentIssueRequest;
+import com.example.subsidy_management_api.api.dto.DocumentIssueResponse;
 import com.example.subsidy_management_api.api.dto.DocumentListItem;
 import com.example.subsidy_management_api.domain.DocumentType;
 import com.example.subsidy_management_api.service.DocumentDraftService;
+import com.example.subsidy_management_api.service.DocumentIssueService;
 import com.example.subsidy_management_api.service.DocumentService;
 import jakarta.validation.Valid;
 import java.util.List;
@@ -24,10 +27,12 @@ public class DocumentController {
 
   private final DocumentService service;
   private final DocumentDraftService draftService;
+  private final DocumentIssueService issueService;
 
-  public DocumentController(DocumentService service, DocumentDraftService draftService) {
+  public DocumentController(DocumentService service, DocumentDraftService draftService, DocumentIssueService issueService) {
     this.service = service;
     this.draftService = draftService;
+    this.issueService = issueService;
   }
 
   @PostMapping
@@ -47,5 +52,11 @@ public class DocumentController {
       @RequestParam DocumentType documentType
   ) {
     return draftService.draft(applicationId, documentType);
+  }
+
+  @PostMapping("/issue")
+  @ResponseStatus(HttpStatus.CREATED)
+  public DocumentIssueResponse issue(@Valid @RequestBody DocumentIssueRequest req) {
+    return issueService.issue(req);
   }
 }
