@@ -2,7 +2,9 @@ package com.example.subsidy_management_api.api.dto;
 
 import com.example.subsidy_management_api.domain.ApplicationStatus;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
+import jakarta.validation.constraints.Positive;
 
 public class SubsidyApplicationCreateRequest {
 
@@ -26,13 +28,17 @@ public class SubsidyApplicationCreateRequest {
     return application;
   }
 
+  public void setApplicationInput(ApplicationInput application) {
+    this.application = application;
+  }
+
   public void setApplication(ApplicationInput application) {
     this.application = application;
   }
 
   public static class ApplicantInput {
 
-    @NotNull
+    @NotBlank
     private String fullName;
 
     private String fullNameKana;
@@ -101,10 +107,11 @@ public class SubsidyApplicationCreateRequest {
 
   public static class ApplicationInput {
 
-    @NotNull
+    @NotBlank
     private String applicationDate; // まずは文字列で受ける（最短）
 
     @NotNull
+    @Positive
     private Long amountRequested;
 
     @NotNull
