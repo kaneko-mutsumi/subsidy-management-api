@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.subsidy_management_api.mapper.DocumentMapper">
+
+  <insert id="insert"
+    useGeneratedKeys="true"
+    keyProperty="id"
+    keyColumn="id">
+    INSERT INTO documents
+    (application_id, document_type, document_no, issued_by, payload_json)
+    VALUES
+    (#{applicationId}, #{documentType}, #{documentNo}, #{issuedBy}, #{payloadJson})
+  </insert>
+
+  <select id="findByApplicationId" resultType="com.example.subsidy_management_api.api.dto.DocumentListItem">
+    SELECT
+    d.id AS documentId,
+    d.application_id AS applicationId,
+    d.document_type AS documentType,
+    d.document_no AS documentNo,
+    d.issued_by AS issuedBy,
+    d.issued_at AS issuedAt
+    FROM documents d
+    WHERE d.application_id = #{applicationId}
+    AND d.deleted_at IS NULL
+    ORDER BY d.issued_at DESC, d.id DESC
+  </select>
+
+</mapper>

@@ -84,4 +84,13 @@
     WHERE id = #{id}
     AND deleted_at IS NULL
   </update>
+
+  <select id="existsActiveById" resultType="int">
+    SELECT 1
+    FROM subsidy_applications
+    WHERE id = #{id}
+    AND deleted_at IS NULL
+    LIMIT 1
+  </select>
+
 </mapper>
