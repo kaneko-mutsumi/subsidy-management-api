@@ -1,0 +1,38 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+  PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+  "https://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.example.subsidy_management_api.mapper.ReportMapper">
+
+  <select id="countApplications" resultType="long">
+    SELECT COUNT(*)
+    FROM subsidy_applications sa
+    WHERE sa.deleted_at IS NULL
+    <if test="from != null">
+      AND sa.application_date &gt;= #{from}
+    </if>
+    <if test="to != null">
+      AND sa.application_date &lt;= #{to}
+    </if>
+    <if test="status != null and status != ''">
+      AND sa.status = #{status}
+    </if>
+  </select>
+
+  <select id="sumAmountRequested" resultType="long">
+    SELECT SUM(sa.amount_requested)
+    FROM subsidy_applications sa
+    WHERE sa.deleted_at IS NULL
+    <if test="from != null">
+      AND sa.application_date &gt;= #{from}
+    </if>
+    <if test="to != null">
+      AND sa.application_date &lt;= #{to}
+    </if>
+    <if test="status != null and status != ''">
+      AND sa.status = #{status}
+    </if>
+  </select>
+
+</mapper>
