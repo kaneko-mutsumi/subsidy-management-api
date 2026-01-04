@@ -1,11 +1,12 @@
 package com.example.subsidy_management_api.service;
 
+import com.example.subsidy_management_api.api.dto.ReportStatusBreakdownItem;
 import com.example.subsidy_management_api.api.dto.ReportSummaryResponse;
 import com.example.subsidy_management_api.mapper.ReportMapper;
+import java.time.LocalDate;
+import java.util.List;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDate;
 
 @Service
 public class ReportService {
@@ -27,5 +28,12 @@ public class ReportService {
     long total = (sum == null) ? 0L : sum;
 
     return new ReportSummaryResponse(fromDate, toDate, st, count, total);
+  }
+
+  @Transactional(readOnly = true)
+  public List<ReportStatusBreakdownItem> breakdown(String from, String to) {
+    LocalDate fromDate = (from == null || from.isBlank()) ? null : LocalDate.parse(from);
+    LocalDate toDate = (to == null || to.isBlank()) ? null : LocalDate.parse(to);
+    return reportMapper.breakdownByStatus(fromDate, toDate);
   }
 }

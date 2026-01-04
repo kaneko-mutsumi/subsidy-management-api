@@ -35,4 +35,20 @@
     </if>
   </select>
 
+  <select id="breakdownByStatus" resultType="com.example.subsidy_management_api.api.dto.ReportStatusBreakdownItem">
+    SELECT
+    sa.status AS status,
+    COUNT(*) AS count,
+    COALESCE(SUM(sa.amount_requested), 0) AS totalAmountRequested
+    FROM subsidy_applications sa
+    WHERE sa.deleted_at IS NULL
+    <if test="from != null">
+      AND sa.application_date &gt;= #{from}
+    </if>
+    <if test="to != null">
+      AND sa.application_date &lt;= #{to}
+    </if>
+    GROUP BY sa.status
+    ORDER BY sa.status ASC
+  </select>
 </mapper>
