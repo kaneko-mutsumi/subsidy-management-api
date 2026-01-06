@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.RestControllerAdvice;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
+  private static final org.slf4j.Logger log =
+      org.slf4j.LoggerFactory.getLogger(GlobalExceptionHandler.class);
+
   @ExceptionHandler(NotFoundException.class)
   @ResponseStatus(HttpStatus.NOT_FOUND)
   public ApiErrorResponse handleNotFound(NotFoundException ex) {
@@ -42,6 +45,7 @@ public class GlobalExceptionHandler {
   @ExceptionHandler(Exception.class)
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   public ApiErrorResponse handleUnexpected(Exception ex) {
+    log.error("Unexpected error occurred", ex);
     return new ApiErrorResponse("INTERNAL_ERROR", "Unexpected error", OffsetDateTime.now());
   }
 }
