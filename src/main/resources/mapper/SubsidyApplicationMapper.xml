@@ -5,6 +5,25 @@
 
 <mapper namespace="com.example.subsidy_management_api.mapper.SubsidyApplicationMapper">
 
+  <insert id="insert"
+    parameterType="com.example.subsidy_management_api.domain.SubsidyApplication"
+    useGeneratedKeys="true"
+    keyProperty="id">
+    INSERT INTO subsidy_applications (
+    applicant_id,
+    application_date,
+    amount_requested,
+    status
+    ) VALUES (
+    #{applicantId},
+    #{applicationDate},
+    #{amountRequested},
+    #{status}
+    )
+  </insert>
+
+
+
   <!-- ✅ COUNT（total取得） -->
   <select id="countList" resultType="long">
     SELECT COUNT(*)
@@ -75,5 +94,49 @@
     ORDER BY ${orderBy}
     LIMIT #{limit} OFFSET #{offset}
   </select>
+
+  <select id="existsActiveById" resultType="int">
+    SELECT 1
+    FROM subsidy_applications sa
+    WHERE sa.id = #{id}
+    AND sa.deleted_at IS NULL
+    LIMIT 1
+  </select>
+
+  <select id="findDetailById"
+    resultType="com.example.subsidy_management_api.api.dto.SubsidyApplicationDetailResponse">
+    SELECT
+    sa.id AS applicationId,
+    sa.applicant_id AS applicantId,
+
+    a.full_name AS applicantFullName,
+    a.full_name_kana AS applicantFullNameKana,
+    a.email AS applicantEmail,
+    a.phone AS applicantPhone,
+    a.postal_code AS applicantPostalCode,
+    a.address1 AS applicantAddress1,
+    a.address2 AS applicantAddress2,
+
+    sa.application_date AS applicationDate,
+    sa.amount_requested AS amountRequested,
+    sa.status AS status,
+    sa.decision_date AS decisionDate,
+    sa.approved_amount AS approvedAmount,
+    sa.paid_date AS paidDate,
+    sa.note AS note
+    FROM subsidy_applications sa
+    JOIN applicants a ON a.id = sa.applicant_id
+    WHERE sa.id = #{id}
+    AND sa.deleted_at IS NULL
+    AND a.deleted_at IS NULL
+    LIMIT 1
+  </select>
+
+  <update id="logicalDeleteById">
+    UPDATE subsidy_applications
+    SET deleted_at = CURRENT_TIMESTAMP(6)
+    WHERE id = #{id}
+    AND deleted_at IS NULL
+  </update>
 
 </mapper>
