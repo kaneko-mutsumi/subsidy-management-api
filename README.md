@@ -165,6 +165,276 @@ DATETIME deleted_at
 | `documents`            | 通知書の発行記録（payload含む）を管理 |
 
 ---
+## シーケンス図
+
+了解です。いまの実装（申請受付・一覧検索（ページング/ソート）・詳細・論理削除・集計（summary / status別内訳）・documents（draft / issue）・例外統一）前提で、**READMEにそのままコピペできる Mermaid のシーケンス図**を作りました。
+（説明は全部日本語、`sequenceDiagram` なので GitHub でそのままレンダリングできます）
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as Service（@Transactional）
+  participant AM as ApplicantMapper（MyBatis）
+  participant APM as ApplicationMapper（MyBatis）
+  participant DB as MySQL（RDB）
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 1) 申請受付（申請者＋申請を一括登録） POST /subsidy-applications
+  利用者->>API: POST /subsidy-applications（JSON）
+  API->>API: @Valid 入力検証
+  alt バリデーションNG
+    API-->>利用者: 400 Bad Request（統一エラー形式）
+  else OK
+    API->>SVC: create(request)
+    SVC->>SVC: トランザクション開始（@Transactional）
+
+    SVC->>AM: insert(applicant) ※useGeneratedKeys
+    AM->>DB: INSERT applicants ...
+    DB-->>AM: applicant.id（自動採番）
+    AM-->>SVC: applicant.id
+
+    SVC->>APM: insert(application) ※useGeneratedKeys
+    APM->>DB: INSERT subsidy_applications (applicant_id=applicant.id) ...
+    DB-->>APM: application.id（自動採番）
+    APM-->>SVC: application.id
+
+    SVC-->>API: CreateResponse(applicantId, applicationId)
+    API-->>利用者: 201 Created（作成ID返却）
+  end
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as Service
+  participant APM as ApplicationMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 2) 一覧/検索（代表条件＋ページング＋安全なソート） GET /subsidy-applications
+  利用者->>API: GET /subsidy-applications?status&from&to&q&limit&offset&sort
+  API->>SVC: findList(status, from, to, q, limit, offset, sort)
+  SVC->>SVC: パラメータ正規化（空→null）
+  SVC->>SVC: limit/offset デフォルト＆妥当性チェック
+  SVC->>SVC: sort をホワイトリスト変換 → orderBy（固定文字列のみ）
+
+  SVC->>APM: countList(filters)
+  APM->>DB: SELECT COUNT(*) ... WHERE deleted_at IS NULL ...
+  DB-->>APM: total
+  APM-->>SVC: total
+
+  SVC->>APM: findList(filters, limit, offset, orderBy)
+  APM->>DB: SELECT ... JOIN applicants ... ORDER BY ${orderBy} LIMIT/OFFSET
+  DB-->>APM: items
+  APM-->>SVC: items
+
+  SVC-->>API: ListResponse(items,total,limit,offset,sort)
+  API-->>利用者: 200 OK（一覧＋total）
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as Service
+  participant APM as ApplicationMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 3) 詳細取得（申請＋申請者JOIN） GET /subsidy-applications/{id}
+  利用者->>API: GET /subsidy-applications/{id}
+  API->>SVC: findDetail(id)
+  SVC->>APM: findDetailById(id)
+  APM->>DB: SELECT ... JOIN applicants ... WHERE sa.id=? AND sa.deleted_at IS NULL
+  alt 見つからない（0件）
+    DB-->>APM: empty
+    APM-->>SVC: Optional.empty
+    SVC-->>API: NotFoundException
+    API-->>利用者: 404 Not Found（統一エラー形式）
+  else 見つかる
+    DB-->>APM: detail row
+    APM-->>SVC: detail DTO
+    SVC-->>API: detail DTO
+    API-->>利用者: 200 OK（詳細）
+  end
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as Service（@Transactional）
+  participant APM as ApplicationMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 4) 論理削除（deleted_at更新） DELETE /subsidy-applications/{id}
+  利用者->>API: DELETE /subsidy-applications/{id}
+  API->>SVC: delete(id)
+  SVC->>APM: logicalDeleteById(id)
+  APM->>DB: UPDATE subsidy_applications SET deleted_at=NOW(...) WHERE id=? AND deleted_at IS NULL
+  alt 更新件数=0（存在しない/既に削除）
+    DB-->>APM: 0 rows
+    APM-->>SVC: 0
+    SVC-->>API: NotFoundException
+    API-->>利用者: 404 Not Found（統一エラー形式）
+  else 成功
+    DB-->>APM: 1 row
+    APM-->>SVC: 1
+    SVC-->>API: OK
+    API-->>利用者: 204 No Content
+  end
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as Service
+  participant RM as ReportMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 5) 集計（件数・申請額合計） GET /reports/summary
+  利用者->>API: GET /reports/summary?status&from&to（未指定=全件）
+  API->>SVC: summary(status, from, to)
+  SVC->>SVC: パラメータ正規化（未指定=全件集計）
+  SVC->>RM: selectSummary(filters)
+  RM->>DB: SELECT COUNT(*), SUM(amount_requested) ... WHERE deleted_at IS NULL ...
+  DB-->>RM: summary
+  RM-->>SVC: summary
+  SVC-->>API: summary DTO（from/to/statusは受け取った値をそのまま返却）
+  API-->>利用者: 200 OK（summary）
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as Service
+  participant RM as ReportMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 6) 状態別内訳（GROUP BY） GET /reports/breakdown-by-status
+  利用者->>API: GET /reports/breakdown-by-status?from&to（未指定=全件）
+  API->>SVC: breakdownByStatus(from, to)
+  SVC->>SVC: パラメータ正規化（未指定=全件）
+  SVC->>RM: selectBreakdownByStatus(filters)
+  RM->>DB: SELECT status, COUNT(*), SUM(amount_requested) ... GROUP BY status
+  DB-->>RM: rows
+  RM-->>SVC: rows
+  SVC-->>API: breakdown DTO
+  API-->>利用者: 200 OK（状態別内訳）
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as DocumentService
+  participant APM as ApplicationMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 7) 通知書Draft（自動差し込み下書き） GET /documents/draft
+  利用者->>API: GET /documents/draft?applicationId=...&documentType=...
+  API->>SVC: draft(applicationId, documentType)
+  SVC->>SVC: documentType（enum）解釈
+  SVC->>APM: findDetailById(applicationId)（申請＋申請者）
+  APM->>DB: SELECT ... JOIN ... WHERE id=? AND deleted_at IS NULL
+  alt 申請が存在しない
+    DB-->>APM: empty
+    APM-->>SVC: empty
+    SVC-->>API: NotFoundException
+    API-->>利用者: 404 Not Found（統一エラー形式）
+  else 存在する
+    DB-->>APM: detail
+    APM-->>SVC: detail
+    SVC->>SVC: 申請データから payload を自動生成（不足項目はnull）
+    SVC-->>API: DraftResponse(applicationId, documentType, payload)
+    API-->>利用者: 200 OK（draft payload）
+  end
+  end
+```
+
+---
+
+```mermaid
+sequenceDiagram
+  autonumber
+  actor 利用者 as 利用者（Postman等）
+  participant API as Controller
+  participant SVC as DocumentService（@Transactional）
+  participant APM as ApplicationMapper（MyBatis）
+  participant DM as DocumentMapper（MyBatis）
+  participant DB as MySQL
+
+  rect rgb(245,245,245)
+  note over 利用者,DB: 8) 通知書Issue（入力簡略：Draft + overridesPayload） POST /documents/issue
+  利用者->>API: POST /documents/issue（applicationId, documentType, documentNo?, issuedBy?, overridesPayload）
+  API->>API: @Valid 入力検証（必須/形式）
+  alt バリデーションNG
+    API-->>利用者: 400 Bad Request（統一エラー形式）
+  else OK
+    API->>SVC: issue(request)
+    SVC->>SVC: トランザクション開始（@Transactional）
+    SVC->>SVC: documentType（enum）解釈
+
+    SVC->>APM: findDetailById(applicationId)
+    APM->>DB: SELECT ...（申請＋申請者）
+    alt 申請が存在しない
+      DB-->>APM: empty
+      APM-->>SVC: empty
+      SVC-->>API: NotFoundException
+      API-->>利用者: 404 Not Found（統一エラー形式）
+    else 存在する
+      DB-->>APM: detail
+      APM-->>SVC: detail
+      SVC->>SVC: Draft payload 生成
+      SVC->>SVC: overridesPayload を上書き合成（不足分だけ入力）
+      SVC->>DM: insert(document)（payload_json保存）
+      DM->>DB: INSERT documents (application_id, document_type, payload_json, ...)
+      DB-->>DM: document.id
+      DM-->>SVC: document.id
+      SVC-->>API: IssueResponse(documentId,...)
+      API-->>利用者: 201 Created（発行記録）
+    end
+  end
+  end
+```
+
+
+---
 
 
 ## 🧪 テスト（JUnit）
