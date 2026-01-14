@@ -1,4 +1,4 @@
-# subsidy-management-api
+ # subsidy-management-api
 
 自治体業務を想定した「補助金申請の管理システム」風の Web API（ポートフォリオ）です。  
 申請データの検索・集計（議会報告）をスムーズにし、通知書の作成業務（転記入力）を **Draft（自動入力）＋不足分だけ上書き** で簡略化することを目的にしています。
@@ -60,57 +60,51 @@
 
 ### 🆕 申請受付（POST /subsidy-applications）
 - **説明**：申請者＋申請を1回のPOSTで登録し、`201 Created` を確認します。
-
-![img.png](img.png)
+![img.png](docs/images/img.png)
 
 ### 📄 申請一覧／検索（GET /subsidy-applications）
 * **説明**：氏名/状態/期間で検索し、ページング/ソートが効くことを確認します。
 - 申請一覧（全件）
-![img_7.png](img_7.png)
-![img_8.png](img_8.png)
-![img_10.png](img_10.png)
+![Adobe Express - Video Project 1.gif](docs/images/Adobe%20Express%20-%20Video%20Project%201.gif)
 
 - 氏名検索（部分一致）
-![img_20.png](img_20.png)
+![img_20.png](docs/images/img_20.png)
 
 
 ### 🔍 申請詳細（GET /subsidy-applications/{id}）
 * **説明**：指定IDの申請詳細が取得できることを確認します。
 
-![img_4.png](img_4.png)
+![img_4.png](docs/images/img_4.png)
 
 ### 🗑️ 論理削除（DELETE /subsidy-applications/{id}）
 * **説明**：`204 No Content` を確認し、その後一覧から消える（deleted_atが入る）ことを確認します。
 
-![img_11.png](img_11.png)
+![img_11.png](docs/images/img_11.png)
 
 ### 📊 レポート集計（GET /reports/summary）
 * **説明**：条件未指定＝全件、条件指定（status/期間）で集計が変わることを確認します。
 
 - 条件未指定＝全件
-![img_12.png](img_12.png)
+![img_12.png](docs/images/img_12.png)
 
 - 条件指定（status/期間）
-![img_13.png](img_13.png)
-![img_14.png](img_14.png)
-![img_15.png](img_15.png)
+![条件指定（status期間）.png](docs/images/%E6%9D%A1%E4%BB%B6%E6%8C%87%E5%AE%9A%EF%BC%88status%E6%9C%9F%E9%96%93%EF%BC%89.png)
 
 ### 🧾 状態別内訳（GET /reports/breakdown-by-status）
 * **説明**：状態別（GROUP BY）の件数・合計が返ることを確認します。
 
-![img_16.png](img_16.png)
+![img_16.png](docs/images/img_16.png)
 
 ### 📝 通知書Draft（GET /documents/draft）
 * **説明**：`GET /subsidy-applications` で実在する `applicationId` を確認し、そのIDで `GET /documents/draft?applicationId=○○&documentType=DECISION_NOTICE` を叩いてレスポンスの差し込み項目が DBにある値は入っていて、未入力項目は null のまま になっているか確認します。
 
-![img_17.png](img_17.png)
+![img_17.png](docs/images/img_17.png)
 
 
 ### 🧾 通知書発行記録（POST /documents）
 * **説明**：Draftを元に不足分だけ入力して `201 Created` を確認し、発行ログが残ることを確認します。
+![通知書発行記録（POST documents）.gif](docs/images/%E9%80%9A%E7%9F%A5%E6%9B%B8%E7%99%BA%E8%A1%8C%E8%A8%98%E9%8C%B2%EF%BC%88POST%20documents%EF%BC%89.gif)
 
-![img_18.png](img_18.png)
-![img_19.png](img_19.png)
 ---
 
 ## 🗂 データベース設計（ER図）
